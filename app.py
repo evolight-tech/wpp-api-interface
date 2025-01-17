@@ -6,6 +6,7 @@ import os
 load_dotenv(override=True)
 SENHA = os.getenv("SENHA")
 
+
 # Configuração inicial
 st.set_page_config(page_title="Gerenciador de API", layout="wide",initial_sidebar_state="collapsed")
 

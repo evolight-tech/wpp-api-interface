@@ -37,7 +37,7 @@ def render():
                     df.reset_index(drop=True, inplace=True)
                     # Mapeia os valores da coluna 'disponivel'
                     if "disponivel" in df.columns:
-                        df["disponivel"] = df["disponivel"].map({1: "Indisponível", 0: "Disponível"})
+                        df["disponivel"] = df["disponivel"].map({True: "Indisponível", False: "Disponível"})
                     st.dataframe(df,hide_index=True)  # Exibição como tabela interativa
                 else:
                     st.info("Nenhum contato cadastrado.")

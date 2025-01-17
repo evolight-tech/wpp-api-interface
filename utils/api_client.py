@@ -6,6 +6,7 @@ load_dotenv(override=True)
 MY_API_KEY = os.getenv("MY_API_KEY")
 WPP_ACCESS_TOKEN = os.getenv("WPP_ACCESS_TOKEN")
 WABA_ID = os.getenv("WABA_ID")
+URL = os.getenv("URL")
 
 def get_templates():
     templates_url = f'https://graph.facebook.com/v20.0/{WABA_ID}/message_templates'
@@ -22,7 +23,7 @@ def get_templates():
         return {"error": "Erro inesperado."}
 
 def call_api(endpoint, method="GET", data=None):
-    base_url = "http://engtec.pythonanywhere.com"
+    base_url = URL
     headers = {"Content-Type": "application/json","authorization":f"Bearer {MY_API_KEY}"}
     try:
         if method == "GET":
