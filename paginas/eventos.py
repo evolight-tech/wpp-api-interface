@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
-from utils.api_client import call_api,get_templates
+from utils.api_client import call_api, get_templates
+
 
 def render():
     st.title("Eventos")
     with st.expander("Sobre esta página:"):
-        st.write("""
+        st.write(
+            """
             Esta seção está relacionada aos eventos configurados nas automações de marketing do RD Station.
             Para integrar o chatbot à automação, é necessário configurar um evento por aqui, definindo o nome do evento e a mensagem a ser enviada.\n
             O modelo da mensagem deve ser configurado através da plataforma da Meta, e o nome da mensagem deve ser informado aqui.\n
@@ -19,40 +21,52 @@ def render():
             - Ver Eventos: Lista todos os eventos cadastrados.    
             - Adicionar Evento: Adiciona um novo evento.
             - Remover Evento: Remove um evento existente
-        """)
-    option = st.selectbox("Escolha uma ação:", ["Ver Eventos", "Adicionar Evento", "Remover Evento"])
+        """
+        )
+    option = st.selectbox(
+        "Escolha uma ação:", ["Ver Eventos", "Adicionar Evento", "Remover Evento"]
+    )
     response = call_api("/eventos", method="GET")
     eventos = []
     for evento in response:
-        eventos.append(evento['evento'])
+        eventos.append(evento["evento"])
 
     if option == "Ver Eventos":
         if st.button("Listar Eventos"):
             response = call_api("/eventos", method="GET")
-            if response and isinstance(response, list):  # Verifica se a resposta é uma lista
+            if response and isinstance(
+                response, list
+            ):  # Verifica se a resposta é uma lista
                 if len(response) > 0:
+                    base_url = "http://engtec.pythonanywhere.com/rd/leads/"
+                    for evento in response:
+                        evento["url"] = f"{base_url}{evento['evento']}"
                     # Converte a resposta em um DataFrame para exibir como tabela
                     df = pd.DataFrame(response)
                     df.reset_index(drop=True, inplace=True)
-                    st.dataframe(df,hide_index=True)  # Exibição como tabela interativa
+                    colunas_ordenadas = ["evento", "mensagem", "url"]
+                    df = df[colunas_ordenadas]
+                    st.dataframe(df, hide_index=True)  # Exibição como tabela interativa
                 else:
                     st.info("Nenhum evento encontrado.")
             else:
                 st.warning("Nenhum evento encontrado.")
-    
+
     elif option == "Adicionar Evento":
         evento = st.text_input("Nome do evento (não deve conter caracteres especiais)")
-        message_names = [template['name'] for template in get_templates()]
-        mensagem = st.selectbox("Mensagem (retirada do Meta Business Manager)", message_names)
+        message_names = [template["name"] for template in get_templates()]
+        mensagem = st.selectbox(
+            "Mensagem (retirada do Meta Business Manager)", message_names
+        )
         if st.button("Adicionar Evento"):
             data = {"evento": evento, "mensagem": mensagem}
             response = call_api("/eventos", method="POST", data=data)
             st.json(response)
-    
+
     elif option == "Remover Evento":
         # Dropdown para escolher o evento
         evento = st.selectbox("Escolha o evento a ser removido:", eventos)
-        data = {'evento': evento}
+        data = {"evento": evento}
         if st.button("Remover evento"):
             response = call_api(f"/eventos", method="DELETE", data=data)
             st.json(response)
